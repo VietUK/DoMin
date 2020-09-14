@@ -12,3 +12,4 @@ VanhProcedure.ppu
 .vscode/launch.json
 .vscode/settings.json
 .vscode/tasks.json
+*.json
