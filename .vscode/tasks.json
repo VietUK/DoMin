@@ -7,7 +7,7 @@
             "command": "fpc",
             "args": [
                 "-g",
-                "${file}"
+                "${file}" 
             ],
             "group": {
                 "kind": "build",

@@ -9,3 +9,6 @@ VanhFunction.o
 VanhFunction.ppu
 VanhProcedure.o
 VanhProcedure.ppu
+.vscode/launch.json
+.vscode/settings.json
+.vscode/tasks.json
