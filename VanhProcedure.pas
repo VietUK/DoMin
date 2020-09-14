@@ -3,7 +3,7 @@
 unit VanhProcedure;
 interface
 
-uses dos, sysutils, windows, classes, VanhFunction;
+uses dos, sysutils, windows, classes, VanhFunction; 
 
 var
     dosmemselector            : word;
@@ -20,7 +20,7 @@ procedure seg_fillword(seg : word;ofs : longint;count : longint;w : word);
 procedure clrscr;
 Procedure GotoXY(GotoXY_X, GotoXY_Y: tcrtcoord);
 Procedure ClrEol;
-procedure color(backgroundcolor_input, textcolor_input: Byte);
+procedure color(textcolor_input, backgroundcolor_input: Byte);
 procedure cursoron;
 procedure cursoroff;
 procedure cursorbig;
@@ -29,6 +29,8 @@ procedure programTitle(programTitle_input: pchar);
 procedure installSRC;
 procedure TVWrite(TVWrite_input: string);
 procedure TVWriteln(TVWriteln_input: string);
+procedure CharPrint(CharPrint_inp: Char);
+procedure removeline(y : DWord);
 const 
     dosmemfillword : procedure(seg,ofs : word;count : longint;w : word)=@dpmi_dosmemfillword;
     TextLarge      = 30;
@@ -38,6 +40,38 @@ implementation
         VidSeg    : word;
         CursorInfo: TConsoleCursorInfo;
         ConsoleInfo : TConsoleScreenBufferinfo;
+
+    procedure removeline(y : DWord);
+    var
+        ClipRect: TSmallRect;
+        SrcRect : TSmallRect;
+        DestCoor: TCoord;
+        CharInfo: TCharInfo;
+    begin
+        CharInfo.UnicodeChar := #32;
+        CharInfo.Attributes := TextAttr;
+
+        Y := (WindMinY - 1) + (Y - 1) + 1;
+
+        SrcRect.Top    := Y;
+        SrcRect.Left   := WindMinX - 1;
+        SrcRect.Right  := ConsoleSize.X - 1;
+        SrcRect.Bottom := ConsoleSize.Y - 1;
+
+        DestCoor.X := WindMinX - 1;
+        DestCoor.Y := Y - 1;
+
+        ClipRect := SrcRect;
+        cliprect.top := destcoor.y;
+
+        ScrollConsoleScreenBuffer(
+            GetStdHandle(STD_OUTPUT_HANDLE), 
+            SrcRect, 
+            ClipRect,
+            DestCoor, 
+            CharInfo
+        );
+    end;
     
     procedure TVWrite(TVWrite_input: string);
     begin
@@ -137,7 +171,7 @@ implementation
         Coord: TCoord;
     begin
         CharInfo := #32;
-        Coord:= GetScreenCursor;
+        Coord:= ScreenCursor;
         FillConsoleOutputCharacter(GetStdHandle(STD_OUTPUT_HANDLE), CharInfo, ConsoleSize.X - Coord.X, Coord, @Temp);
         FillConsoleOutputAttribute(GetStdHandle(STD_OUTPUT_HANDLE), TextAttr, ConsoleSize.X - Coord.X, Coord, @Temp);
     end;
@@ -154,7 +188,7 @@ implementation
         Sleep(ms);
     end;
 
-    procedure color(backgroundcolor_input, textcolor_input: Byte);
+    procedure color(textcolor_input, backgroundcolor_input: Byte);
     begin
         TextColor(textcolor_input);TextBackground(backgroundcolor_input);
     end;
@@ -190,6 +224,25 @@ implementation
         SetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), CursorInfo);
     end;
 
+    procedure CharPrint(CharPrint_inp: Char);
+    var 
+        write_num: DWord;
+    begin
+        WriteConsoleOutputCharacter(
+            GetStdhandle(STD_OUTPUT_HANDLE), 
+            @CharPrint_inp, 
+            1, 
+            ScreenCursor, 
+            write_num
+        );
+        WriteConsoleOutputAttribute(
+            GetStdHandle(STD_OUTPUT_HANDLE),
+            @TextAttr,
+            1,
+            ScreenCursor,
+            write_num
+        );        
+    end;
 Initialization
     FillChar(CursorInfo, SizeOf(CursorInfo), 00);
     GetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), CursorInfo);

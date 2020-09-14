@@ -5,7 +5,7 @@ program
 uses
     vanhprocedure,
     vanhFunction,
-    DoMinUnit_V0_3,
+    DoMinUnit,
     windows,
     dos,
     keyboard;
@@ -27,7 +27,7 @@ procedure
         DoMin_V0_9_Variable.Boom.Number         := 0;
         DoMin_V0_9_Variable.Boom.found          := 0;
         DoMin_V0_9_Variable.console.FontSize    := TextNormal;
-        DoMin_V0_9_Variable.console.char        := '?';
+        DoMin_V0_9_Variable.console.char        := char(254);
         for _i:= C_maxAm to C_max
         do begin
             for _j:= C_maxAm to C_max

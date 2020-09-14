@@ -1,6 +1,6 @@
 {$APPTYPE CONSOLE}
 {$MODE OBJFPC}
-unit VanhFunction;
+unit VanhFunction; 
 interface
 
 uses dos, sysutils, windows, classes;
@@ -15,7 +15,7 @@ function SoHoa(input_SoHoa: string): integer;
 function Set_console_fontsize(Fontsize: smallint {short}): integer;
 function CharInc(CharInc_input: char):char;
 function ReadKey: Char;
-function GetScreenCursor: tcoord;
+function ScreenCursor: tcoord;
 function ConsoleSize: tcoord;
 
 implementation
@@ -43,7 +43,7 @@ implementation
         ConsoleSize.Y := ConsoleInfo.dwMaximumWindowSize.Y;
     end;
 
-    function GetScreenCursor: tcoord;
+    function ScreenCursor: tcoord;
     var
         ConsoleInfo : TConsoleScreenBufferInfo;
     begin
@@ -52,8 +52,8 @@ implementation
             GetStdHandle(STD_OUTPUT_HANDLE), 
             ConsoleInfo
         );
-        GetScreenCursor.X := ConsoleInfo.dwCursorPosition.X;
-        GetScreenCursor.Y := ConsoleInfo.dwCursorPosition.Y;
+        ScreenCursor.X := ConsoleInfo.dwCursorPosition.X;
+        ScreenCursor.Y := ConsoleInfo.dwCursorPosition.Y;
     end;
 
     function SetCurrentConsoleFontEx(hConsoleOutput: HANDLE; bMaximumWindow: BOOL; var CONSOLE_FONT_INFOEX): BOOL;
