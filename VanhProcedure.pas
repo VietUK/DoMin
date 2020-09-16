@@ -87,7 +87,9 @@ implementation
         SetMultiByteConversionCodePage(CP_UTF8);
         SetMultiByteRTLFileSystemCodePage(CP_UTF8);
         SetConsoleOutputCP(CP_UTF8);
-        writeln(TVWriteln_input);
+        if TVWriteln_input = ''
+        then writeln
+        else writeln(TVWriteln_input);
     end;
 
     procedure WindowsGenerator(WindowsGenerator_X, WindowsGenerator_Y:integer);
@@ -274,5 +276,8 @@ Initialization
     WindMaxX := (ConsoleInfo.srWindow.Right) + 1;
     WindMaxY := (ConsoleInfo.srWindow.Bottom) + 1;
     exec('cmd', '/c chcp 65001');
+    SetMultiByteConversionCodePage(CP_UTF8);
+    SetMultiByteRTLFileSystemCodePage(CP_UTF8);
+    SetConsoleOutputCP(CP_UTF8);
     clrscr;
 end.

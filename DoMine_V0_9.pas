@@ -10,57 +10,57 @@ uses
     dos,
     keyboard;
 var  
-    DoMin_V0_9_Variable : ProgramVariable;
+    DoMinVar : ProV;
     _i, _i1, _j, _j1    : T_integer;
     _key                : char;
 procedure
-    resetValue();
+    resetVal();
     begin
         programTitle('DoMin_V0_9');
         SetMultiByteConversionCodePage(CP_UTF8);
         SetMultiByteRTLFileSystemCodePage(CP_UTF8);
         SetConsoleOutputCP(CP_UTF8);
-        DoMin_V0_9_Variable.X.max               := 1;
-        DoMin_V0_9_Variable.Y.max               := 1;
-        DoMin_V0_9_Variable.Boom.find           := 1;
-        DoMin_V0_9_Variable.Boom.Difficult.Level:= 1;
-        DoMin_V0_9_Variable.Boom.Number         := 0;
-        DoMin_V0_9_Variable.Boom.found          := 0;
-        DoMin_V0_9_Variable.console.FontSize    := TextNormal;
-        DoMin_V0_9_Variable.console.char        := char(254);
+        DoMinVar.X.max               := 1;
+        DoMinVar.Y.max               := 1;
+        DoMinVar.Boom.find           := 1;
+        DoMinVar.Boom.Difficult.Level:= 1;
+        DoMinVar.Boom.Number         := 0;
+        DoMinVar.Boom.found          := 0;
+        DoMinVar.console.FontSize    := TextNormal;
+        DoMinVar.console.char        := char(254);
         for _i:= C_maxAm to C_max
         do begin
             for _j:= C_maxAm to C_max
             do begin
-                DoMin_V0_9_Variable.Board[_i, _j].Value:= '0';
-                DoMin_V0_9_Variable.Board[_i, _j].show := 0;
+                DoMinVar.Board[_i, _j].Val:= '0';
+                DoMinVar.Board[_i, _j].show := 0;
             end;
         end;
-        DoMin_V0_9_Variable.Stop:= 0;
+        DoMinVar.Stop:= 0;
     end;
 procedure
     play();
     begin
-        DoMin_V0_9_Variable.X.locate:= 1;
-        DoMin_V0_9_Variable.Y.locate:= 2;
-        DrawRawBoard(DoMin_V0_9_Variable);
+        DoMinVar.X.locate:= 1;
+        DoMinVar.Y.locate:= 2;
+        DrawRawBoard(DoMinVar);
         for _i:= C_maxAm to C_max
         do begin
             for _j:= C_maxAm to C_max
             do begin
-                DoMin_V0_9_Variable.Board[_i, _j].show := 0;
+                DoMinVar.Board[_i, _j].show := 0;
             end;
         end;
         repeat
-            DoMin_V0_9_Variable.console.FontSize:= 
-                Set_console_fontsize(DoMin_V0_9_Variable.console.FontSize);
-            gotoXY(DoMin_V0_9_Variable.X.locate, DoMin_V0_9_Variable.Y.locate);
+            DoMinVar.console.FontSize:= 
+                Set_console_fontsize(DoMinVar.console.FontSize);
+            gotoXY(DoMinVar.X.locate, DoMinVar.Y.locate);
             make_Footprint(
-                DoMin_V0_9_Variable.X.locate, 
-                DoMin_V0_9_Variable.Y.locate, 
-                DoMin_V0_9_Variable
+                DoMinVar.X.locate, 
+                DoMinVar.Y.locate, 
+                DoMinVar
                 );
-            if (DoMin_V0_9_Variable.Stop = 1) or (DoMin_V0_9_Variable.Stop = 2)
+            if (DoMinVar.Stop = 1) or (DoMinVar.Stop = 2)
             then exit
             else begin
                 repeat
@@ -69,40 +69,40 @@ procedure
                         _key:= readkey;
                         case _key of 
                             'a', 'A': 
-                             DoMin_V0_9_Variable.X.locate:= 
+                             DoMinVar.X.locate:= 
                                 processWayGo(
-                                    DoMin_V0_9_Variable.X.locate, 1, 0,
-                                    DoMin_V0_9_Variable.X.locate + 1, 
-                                    DoMin_V0_9_Variable.Y.locate, 0, 
-                                    DoMin_V0_9_Variable.X.max,
-                                    DoMin_V0_9_Variable
+                                    DoMinVar.X.locate, 1, 0,
+                                    DoMinVar.X.locate + 1, 
+                                    DoMinVar.Y.locate, 0, 
+                                    DoMinVar.X.max,
+                                    DoMinVar
                                 );
                             'w', 'W': 
-                             DoMin_V0_9_Variable.Y.locate:= 
+                             DoMinVar.Y.locate:= 
                                 processWayGo(
-                                    DoMin_V0_9_Variable.Y.locate, 1, 1,
-                                    DoMin_V0_9_Variable.X.locate, 
-                                    DoMin_V0_9_Variable.Y.locate + 1, 1, 
-                                    DoMin_V0_9_Variable.Y.max + 1,
-                                    DoMin_V0_9_Variable
+                                    DoMinVar.Y.locate, 1, 1,
+                                    DoMinVar.X.locate, 
+                                    DoMinVar.Y.locate + 1, 1, 
+                                    DoMinVar.Y.max + 1,
+                                    DoMinVar
                                 );
                             'd', 'D': 
-                             DoMin_V0_9_Variable.X.locate:= 
+                             DoMinVar.X.locate:= 
                                 processWayGo(
-                                    DoMin_V0_9_Variable.X.locate, 0, 0,
-                                    DoMin_V0_9_Variable.X.locate - 1, 
-                                    DoMin_V0_9_Variable.Y.locate, 0, 
-                                    DoMin_V0_9_Variable.X.max,
-                                    DoMin_V0_9_Variable
+                                    DoMinVar.X.locate, 0, 0,
+                                    DoMinVar.X.locate - 1, 
+                                    DoMinVar.Y.locate, 0, 
+                                    DoMinVar.X.max,
+                                    DoMinVar
                                 );
                             's', 'S': 
-                             DoMin_V0_9_Variable.Y.locate:= 
+                             DoMinVar.Y.locate:= 
                                 processWayGo(
-                                    DoMin_V0_9_Variable.Y.locate, 0, 1,
-                                    DoMin_V0_9_Variable.X.locate, 
-                                    DoMin_V0_9_Variable.Y.locate - 1, 1, 
-                                    DoMin_V0_9_Variable.Y.max + 1,
-                                    DoMin_V0_9_Variable
+                                    DoMinVar.Y.locate, 0, 1,
+                                    DoMinVar.X.locate, 
+                                    DoMinVar.Y.locate - 1, 1, 
+                                    DoMinVar.Y.max + 1,
+                                    DoMinVar
                                 );
                             'q', 'Q': halt();
                         end;
@@ -112,9 +112,9 @@ procedure
                         ((_key = 'c') or (_key = 'C')) 
                         and 
                         (
-                            DoMin_V0_9_Variable.Board[  
-                                DoMin_V0_9_Variable.X.locate, 
-                                DoMin_V0_9_Variable.Y.locate
+                            DoMinVar.Board[  
+                                DoMinVar.X.locate, 
+                                DoMinVar.Y.locate
                             ].show = 0
                         )
                     )
@@ -122,46 +122,46 @@ procedure
                     ((_key = 'm') or (_key = 'M'))
                     or
                     (
-                        DoMin_V0_9_Variable.Board[
-                            DoMin_V0_9_Variable.X.locate, 
-                            DoMin_V0_9_Variable.Y.locate
-                        ].Value = 'X'
+                        DoMinVar.Board[
+                            DoMinVar.X.locate, 
+                            DoMinVar.Y.locate
+                        ].Val = 'X'
                     )
                     ;
                 case _key of
                     'c', 'C': begin
                         if 
-                            DoMin_V0_9_Variable.Board[
-                                DoMin_V0_9_Variable.X.locate, 
-                                DoMin_V0_9_Variable.Y.locate
-                            ].Value
+                            DoMinVar.Board[
+                                DoMinVar.X.locate, 
+                                DoMinVar.Y.locate
+                            ].Val
                             <>
                             'X'
                         then begin
                             for _i:= 
-                              DoMin_V0_9_Variable.X.locate 
+                              DoMinVar.X.locate 
                               - 
-                              DoMin_V0_9_Variable.Boom.find 
+                              DoMinVar.Boom.find 
                              to 
-                              DoMin_V0_9_Variable.X.locate 
+                              DoMinVar.X.locate 
                               + 
-                              DoMin_V0_9_Variable.Boom.find
+                              DoMinVar.Boom.find
                             do begin
                                 for _j:= 
-                                  DoMin_V0_9_Variable.Y.locate 
+                                  DoMinVar.Y.locate 
                                   - 
-                                  DoMin_V0_9_Variable.Boom.find 
+                                  DoMinVar.Boom.find 
                                  to 
-                                  DoMin_V0_9_Variable.Y.locate 
+                                  DoMinVar.Y.locate 
                                   + 
-                                  DoMin_V0_9_Variable.Boom.find
+                                  DoMinVar.Boom.find
                                 do begin
                                     if 
                                         (
                                             (
                                                 _i 
                                                 <= 
-                                                DoMin_V0_9_Variable.X.max
+                                                DoMinVar.X.max
                                             ) 
                                             and 
                                             (_i >= 1)
@@ -171,7 +171,7 @@ procedure
                                             (
                                                 _j 
                                                 <= 
-                                                 DoMin_V0_9_Variable.Y.max 
+                                                 DoMinVar.Y.max 
                                                  + 
                                                  1
                                             ) 
@@ -179,105 +179,105 @@ procedure
                                             (_j >= 1)
                                         )
                                         and
-                                        (DoMin_V0_9_Variable.Board[_i, _j].show = 0)
+                                        (DoMinVar.Board[_i, _j].show = 0)
                                     then begin
-                                        DoMin_V0_9_Variable.Board[_i, _j].show:= 1;
+                                        DoMinVar.Board[_i, _j].show:= 1;
                                     end;
                                 end;
                             end;
-                            DoMin_V0_9_Variable:= DrawBoard(DoMin_V0_9_Variable);
+                            DoMinVar:= DrawBoard(DoMinVar);
                         end 
                         else begin
-                            DoMin_V0_9_Variable:= 
-                                MessageToQuit('thua', DoMin_V0_9_Variable);
+                            DoMinVar:= 
+                                MessageToQuit('thua', DoMinVar);
                             exit;
                         end;
                     end;
                     'm', 'M': begin
-                        DoMin_V0_9_Variable:= Menu(DoMin_V0_9_Variable);
-                        DrawRawBoard(DoMin_V0_9_Variable);
+                        DoMinVar:= Menu(DoMinVar);
+                        DrawRawBoard(DoMinVar);
                     end;
                 end;
             end;
-        until DoMin_V0_9_Variable.Stop = 1;
+        until DoMinVar.Stop = 1;
     end;
 procedure
     MainProcess();
     begin
         if random(C_max) mod 2 = 0
-        then DoMin_V0_9_Variable.Boom.Number:= 
-                DoMin_V0_9_Variable.X.max
-        else DoMin_V0_9_Variable.Boom.Number:= 
-                DoMin_V0_9_Variable.Y.max;
-        DoMin_V0_9_Variable.Boom.Difficult.random:= 
-            random(DoMin_V0_9_Variable.Boom.Difficult.Level) + 1;
-        DoMin_V0_9_Variable.Boom.find:= 
-            (DoMin_V0_9_Variable.Boom.Number div 2) 
+        then DoMinVar.Boom.Number:= 
+                DoMinVar.X.max
+        else DoMinVar.Boom.Number:= 
+                DoMinVar.Y.max;
+        DoMinVar.Boom.Difficult.random:= 
+            random(DoMinVar.Boom.Difficult.Level) + 1;
+        DoMinVar.Boom.find:= 
+            (DoMinVar.Boom.Number div 2) 
             div 
-            DoMin_V0_9_Variable.Boom.Difficult.Level;
+            DoMinVar.Boom.Difficult.Level;
         if 
             (random(C_max * 100000) mod 78936 = 64)
-        then DoMin_V0_9_Variable.Boom.Number:= 
-                DoMin_V0_9_Variable.Boom.Number 
+        then DoMinVar.Boom.Number:= 
+                DoMinVar.Boom.Number 
                 * 
-                DoMin_V0_9_Variable.Boom.Difficult.Level 
+                DoMinVar.Boom.Difficult.Level 
                 div 
-                DoMin_V0_9_Variable.Boom.find
-        else DoMin_V0_9_Variable.Boom.Number:= 
-                DoMin_V0_9_Variable.Boom.Number 
+                DoMinVar.Boom.find
+        else DoMinVar.Boom.Number:= 
+                DoMinVar.Boom.Number 
                 * 
-                DoMin_V0_9_Variable.Boom.Difficult.Level 
+                DoMinVar.Boom.Difficult.Level 
                 div 
-                DoMin_V0_9_Variable.Boom.Difficult.random;
-        DoMin_V0_9_Variable.Boom.find  := 
-            random(DoMin_V0_9_Variable.Boom.find) + 1;
-        for _i:= 1 to DoMin_V0_9_Variable.Boom.Number
+                DoMinVar.Boom.Difficult.random;
+        DoMinVar.Boom.find  := 
+            random(DoMinVar.Boom.find) + 1;
+        for _i:= 1 to DoMinVar.Boom.Number
         do begin
             repeat
-                DoMin_V0_9_Variable.SetBoom.X:= 
-                    random(DoMin_V0_9_Variable.X.max) + 1;
-                DoMin_V0_9_Variable.SetBoom.Y:= 
-                    random(DoMin_V0_9_Variable.Y.max) + 2;
+                DoMinVar.SetBoom.X:= 
+                    random(DoMinVar.X.max) + 1;
+                DoMinVar.SetBoom.Y:= 
+                    random(DoMinVar.Y.max) + 2;
             until 
-             DoMin_V0_9_Variable.Board[
-                DoMin_V0_9_Variable.SetBoom.X, 
-                DoMin_V0_9_Variable.SetBoom.Y
-             ].Value <> 'X';
-            DoMin_V0_9_Variable.Board[
-                DoMin_V0_9_Variable.SetBoom.X, 
-                DoMin_V0_9_Variable.SetBoom.Y
-            ].Value:= 'X';
+             DoMinVar.Board[
+                DoMinVar.SetBoom.X, 
+                DoMinVar.SetBoom.Y
+             ].Val <> 'X';
+            DoMinVar.Board[
+                DoMinVar.SetBoom.X, 
+                DoMinVar.SetBoom.Y
+            ].Val:= 'X';
             for _i1:= 
-             DoMin_V0_9_Variable.SetBoom.X - 1 
+             DoMinVar.SetBoom.X - 1 
              to 
-             DoMin_V0_9_Variable.SetBoom.X + 1
+             DoMinVar.SetBoom.X + 1
             do begin
                 for _j1:= 
-                 DoMin_V0_9_Variable.SetBoom.Y - 1 
+                 DoMinVar.SetBoom.Y - 1 
                  to 
-                 DoMin_V0_9_Variable.SetBoom.Y + 1
+                 DoMinVar.SetBoom.Y + 1
                 do begin
                     if 
-                        (DoMin_V0_9_Variable.Board[_i1, _j1].Value <> 'X')
+                        (DoMinVar.Board[_i1, _j1].Val <> 'X')
                         and
                         ((_i <> _i1) or (_j <> _j1))
                     then begin
-                        DoMin_V0_9_Variable.Board[_i1, _j1].Value
-                            := CharInc(DoMin_V0_9_Variable.Board[_i1,_j1].Value);
+                        DoMinVar.Board[_i1, _j1].Val
+                            := CharInc(DoMinVar.Board[_i1,_j1].Val);
                     end;
                 end;
             end;
         end;
-        DoMin_V0_9_Variable.console.FontSize:= Set_console_fontsize(TextNormal);
+        DoMinVar.console.FontSize:= Set_console_fontsize(TextNormal);
         play();
     end;
 procedure
     GetInput();
     begin
-        DoMin_V0_9_Variable.console.FontSize:= Set_console_fontsize(TextLarge);
+        DoMinVar.console.FontSize:= Set_console_fontsize(TextLarge);
         WindowsGenerator(18, 2);
-        DoMin_V0_9_Variable.Y.max:= GetXorY('hàng');
-        DoMin_V0_9_Variable.X.max:= GetXorY('cột');
+        DoMinVar.Y.max:= GetXorY('hàng');
+        DoMinVar.X.max:= GetXorY('cột');
         WindowsGenerator(18, 5);
         clrscr;
         repeat
@@ -289,39 +289,39 @@ procedure
             _key:= readkey;
             case _key of    
                 '1': begin 
-                    DoMin_V0_9_Variable.Boom.Difficult.Level:= 2;
+                    DoMinVar.Boom.Difficult.Level:= 2;
                     programTitle('Game này là dễ!!!')
                 end;
                 '2': begin 
-                    DoMin_V0_9_Variable.Boom.Difficult.Level:= 3;
+                    DoMinVar.Boom.Difficult.Level:= 3;
                     programTitle('Hơi khó đấy')
                 end;
                 '3': begin 
-                    DoMin_V0_9_Variable.Boom.Difficult.Level:= 4;
+                    DoMinVar.Boom.Difficult.Level:= 4;
                     programTitle('Hổng vui rồi đó')
                 end;
                 '4': begin 
-                    DoMin_V0_9_Variable.Boom.Difficult.Level:= 5;
+                    DoMinVar.Boom.Difficult.Level:= 5;
                     programTitle('Hận thằng viết chương trình')
                 end;
-                else DoMin_V0_9_Variable.Boom.Difficult.Level:= random(4) + 2;
+                else DoMinVar.Boom.Difficult.Level:= random(4) + 2;
             end;
         until 
-            (DoMin_V0_9_Variable.Boom.Difficult.Level = 2)
+            (DoMinVar.Boom.Difficult.Level = 2)
             or
-            (DoMin_V0_9_Variable.Boom.Difficult.Level = 3)
+            (DoMinVar.Boom.Difficult.Level = 3)
             or
-            (DoMin_V0_9_Variable.Boom.Difficult.Level = 4)
+            (DoMinVar.Boom.Difficult.Level = 4)
             or
-            (DoMin_V0_9_Variable.Boom.Difficult.Level = 5);
+            (DoMinVar.Boom.Difficult.Level = 5);
         MainProcess();
     end;
 BEGIN
-    DoMin_V0_9_Variable.console.FontSize:= Set_console_fontsize(TextNormal);
+    DoMinVar.console.FontSize:= Set_console_fontsize(TextNormal);
     randomize;
     cursoroff;
     repeat
-        resetValue();
+        resetVal();
         GetInput();
-    until DoMin_V0_9_Variable.Stop = 1;
+    until DoMinVar.Stop = 1;
 END.

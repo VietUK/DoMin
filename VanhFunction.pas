@@ -17,6 +17,7 @@ function CharInc(CharInc_input: char):char;
 function ReadKey: Char;
 function ScreenCursor: tcoord;
 function ConsoleSize: tcoord;
+function SadEmoji: string;
 
 implementation
     type
@@ -123,5 +124,16 @@ implementation
     function CharInc(CharInc_input: char):char;
     begin
         CharInc:= IntToStr(sohoa(CharInc_input) + 1)[1];
+    end;
+
+    function SadEmoji: string;
+    var 
+        SadEmoji_arr: array[1..3] of string;
+    begin
+        randomize;
+        SadEmoji_arr[1]:= ':(';
+        SadEmoji_arr[2]:= '';
+        SadEmoji_arr[3]:= '';
+        SadEmoji:= SadEmoji_arr[2];
     end;
 end.
