@@ -3,3 +3,5 @@
 *.o
 *.a
 *.ppu
+test.pas
+test.exe

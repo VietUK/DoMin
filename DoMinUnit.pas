@@ -258,10 +258,10 @@ function changeFontSize(FontSize_ProgramVariable: ProgramVariable): ProgramVaria
         CWindowsGenerator(25, 6, FontSize_ProgramVariable);
         clrscr;
         repeat
-            gotoXY(1, 1);
+            gotoXY     (1, 1);
             TVWrite    ('FontSize hiện tại: ');clreol;
-            textcolor(red);
-            TVWriteln  (IntToStr(changeFontSize.console.FontSize));
+            textcolor  (red);
+            StringPrint(IntToStr(changeFontSize.console.FontSize));
             TVWriteln  ('');            
             TVWriteln  ('[T], [G]: tăng hoặc giảm');
             TVWriteln  ('[H]: qua trang tiếp theo');
@@ -290,10 +290,10 @@ function changeChar(char_ProgramVariable: ProgramVariable): ProgramVariable;
         CWindowsGenerator(25, 6, char_ProgramVariable);
         clrscr;
         repeat
-            gotoXY(1, 1);            
+            gotoXY     (1, 1);            
             TVWrite    ('Char hiện tại: ');
-            textcolor(red);
-            TVWriteln  (Char_CurrentChar);
+            textcolor  (red);
+            StringPrint(Char_CurrentChar);
             TVWriteln  ('');            
             TVWriteln  ('[Bất kì]: thay đổi char');
             TVWriteln  ('[H]: qua trang tiếp theo');

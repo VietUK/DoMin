@@ -31,6 +31,7 @@ procedure TVWrite(TVWrite_input: string);
 procedure TVWriteln(TVWriteln_input: string);
 procedure CharPrint(CharPrint_inp: Char);
 procedure removeline(y : DWord);
+procedure StringPrint(StringPrint_inp: string);
 const 
     dosmemfillword : procedure(seg,ofs : word;count : longint;w : word)=@dpmi_dosmemfillword;
     TextLarge      = 30;
@@ -242,6 +243,26 @@ implementation
             ScreenCursor,
             write_num
         );        
+    end;
+
+    procedure StringPrint(StringPrint_inp: string);
+    var 
+        StringPrint_i: integer;
+    begin
+        for StringPrint_i:= 1 to length(StringPrint_inp)
+        do begin
+            CharPrint(StringPrint_inp[StringPrint_i]);
+            GotoXY(ScreenCursor.X + 2 , ScreenCursor.Y + 1);
+            if ScreenCursor.x + 1 >= ConsoleSize.X then
+             begin
+                GotoXY(WindMinX, ScreenCursor.Y + 2);
+                While ScreenCursor.Y > ConsoleSize.Y do
+                 begin
+                    RemoveLine(1);
+                    GotoXY(ScreenCursor.X, ScreenCursor.Y - 1)
+                 end;
+             end;
+        end;
     end;
 Initialization
     FillChar(CursorInfo, SizeOf(CursorInfo), 00);
