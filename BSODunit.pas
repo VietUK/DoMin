@@ -25,7 +25,7 @@ implementation
 procedure BSOD_Generator(BSOD_Face_String, BSOD_Message_String: string);
     begin
         cursoroff;
-        Set_console_fontsize(32);
+        SetConFont(32);
         WindowsGenerator(40,10);
         gotoXY(5,3);
         textColor(strToInt(red));

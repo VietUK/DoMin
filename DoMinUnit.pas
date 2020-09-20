@@ -1,6 +1,6 @@
 unit DoMinUnit;
 interface
-uses vanhprocedure, vanhfunction, keyboard, sysutils; 
+uses vanhprocedure, vanhfunction, keyboard, sysutils, dos, windows; 
 const 
     C_max          =  60;
     C_maxAm        =  -5;  
@@ -13,7 +13,6 @@ type
         max           : 1..C_max;
         locate        : C_maxAm..C_max;
     end;
-    T_integer         = C_maxAm..C_max;
     ProV = record
         X             : T_locate;
         Y             : T_locate;
@@ -65,34 +64,49 @@ procedure DrawRawBoard     (DrawRawBoard_ProV: ProV);
 function  MessageToQuit    (MessageToQuit_input: string;
                             MessageToQuit_ProV: ProV
                            ): ProV;
+function resetVal           :ProV;
 
 implementation
-function resetVal(resetVal_ProV: ProV): ProV;
+
+    function resetVal(): ProV;
     begin
-        resetVal.X:= resetVal_ProV.X;
-        resetVal.Y:= resetVal_ProV.Y;
-        resetVal.console:= resetVal_ProV.console;
-        resetVal.Boom:= resetVal_ProV.Boom;
-        resetVal.SetBoom:= resetVal_ProV.SetBoom;
-        resetVal.Board:= resetVal_ProV.Board;
-        resetVal.Stop:= resetVal_ProV.Stop;
-    end;
-procedure FinalBoard(FinalBoard_ProV: ProV);
-    var
-        FinalBoard_i, FinalBoard_j: integer;
-    begin
-        for FinalBoard_i:= 1 to FinalBoard_ProV.X.max
+        programTitle('DoMin_V0_9');
+        SetMultiByteConversionCodePage(CP_UTF8);
+        SetMultiByteRTLFileSystemCodePage(CP_UTF8);
+        SetConsoleOutputCP(CP_UTF8);
+        resetVal.X.max               := 1;
+        resetVal.Y.max               := 1;
+        resetVal.Boom.find           := 1;
+        resetVal.Boom.Difficult.Level:= 1;
+        resetVal.Boom.Number         := 0;
+        resetVal.Boom.found          := 0;
+        resetVal.console.FontSize    := TextNormal;
+        resetVal.console.char        := char(254);
+        for _i:= C_maxAm to C_max
         do begin
-            for FinalBoard_j:= 2 to FinalBoard_ProV.Y.max + 1
+            for _j:= C_maxAm to C_max
             do begin
-                gotoXY(FinalBoard_i, FinalBoard_j);
+                resetVal.Board[_i, _j].Val:= '0';
+                resetVal.Board[_i, _j].show := 0;
+            end;
+        end;
+        resetVal.Stop:= 0;
+    end;
+
+    procedure FinalBoard(FinalBoard_ProV: ProV);
+    begin
+        for _i:= 1 to FinalBoard_ProV.X.max
+        do begin
+            for _j:= 2 to FinalBoard_ProV.Y.max + 1
+            do begin
+                gotoXY(_i, _j);
                 if 
-                 FinalBoard_ProV.board[FinalBoard_i, FinalBoard_j].Val <> 'X'
-                then TVWrite(FinalBoard_ProV.Board[FinalBoard_i, FinalBoard_j].Val)
+                 FinalBoard_ProV.board[_i, _j].Val <> 'X'
+                then TVWrite(FinalBoard_ProV.Board[_i, _j].Val, white, black)
                 else 
                  begin
                     textcolor(Red);
-                    CharPrint(FinalBoard_ProV.Board[FinalBoard_i, FinalBoard_j].Val);
+                    CharPrint(FinalBoard_ProV.Board[_i, _j].Val);
                     textcolor(white);
                  end;
             end;
@@ -102,76 +116,77 @@ procedure FinalBoard(FinalBoard_ProV: ProV);
         CharPrint(FinalBoard_ProV.Board[FinalBoard_ProV.X.locate, FinalBoard_ProV.Y.locate].Val);
         textcolor(white);
     end;
-procedure DrawRawBoard(DrawRawBoard_ProV: ProV);
-    var 
-        DrawRawBoard_i, DrawRawBoard_j: integer;
+
+    procedure DrawRawBoard(DrawRawBoard_ProV: ProV);
     begin
         clrscr;
         gotoXY(1, 1);
         CWindowsGenerator(DrawRawBoard_ProV.X.max, DrawRawBoard_ProV.Y.max + 6, DrawRawBoard_ProV);
-        TVWrite  ('[M]: Cài đặt');
+        TVWrite  ('[M]: Cài đặt', white, black);
         gotoXY(1, DrawRawBoard_ProV.Y.max + 2);
-        TVWriteln('[w,a,s,d]: Di chuyển');
-        TVWriteln('[C]: xác nhận vị trí');
-        TVWriteln('[Q]: Thoát game');
-        TVWriteln('Đã thấy ' + IntToStr(DrawRawBoard_ProV.Boom.found) + '/' + IntToStr(DrawRawBoard_ProV.Boom.Number) + '');
-        TVWrite  ('TÌM ĐI, CHỜ CHI!!!!!');
-        for DrawRawBoard_i:= 1 to DrawRawBoard_ProV.X.max
+        TVWriteln('[w,a,s,d]: Di chuyển', white, black);
+        TVWriteln('[C]: xác nhận vị trí', white, black);
+        TVWriteln('[Q]: Thoát game', white, black);
+        TVWriteln('Đã thấy ' + IntToStr(DrawRawBoard_ProV.Boom.found) + '/' + IntToStr(DrawRawBoard_ProV.Boom.Number) + '', white, black);
+        TVWrite  ('TÌM ĐI, CHỜ CHI!!!!!', white, black);
+        for _i:= 1 to DrawRawBoard_ProV.X.max
         do begin
-            for DrawRawBoard_j:= 2 to DrawRawBoard_ProV.Y.max + 1
+            for _j:= 2 to DrawRawBoard_ProV.Y.max + 1
             do begin
-                gotoXY(DrawRawBoard_i, DrawRawBoard_j);
+                gotoXY(_i, _j);
                 if 
-                    (DrawRawBoard_ProV.Board[DrawRawBoard_i, DrawRawBoard_j].show = 0)
+                    (DrawRawBoard_ProV.Board[_i, _j].show = 0)
                 then CharPrint(DrawRawBoard_ProV.console.char)
                 else begin 
                     textcolor(blue);
-                    CharPrint(DrawRawBoard_ProV.Board[DrawRawBoard_i, DrawRawBoard_j].Val);
+                    CharPrint(DrawRawBoard_ProV.Board[_i, _j].Val);
                 end;
             end;
         end;
     end;
-function DrawBoard(DrawBoard_ProV: ProV): ProV;
+
+    function DrawBoard(DrawBoard_ProV: ProV): ProV;
     var 
-        DrawBoard_i, DrawBoard_j: integer;
+        _i, _j: integer;
     begin
         DrawBoard:= DrawBoard_ProV;
-        for DrawBoard_i:= DrawBoard.X.locate - DrawBoard.Boom.find to DrawBoard.X.locate + DrawBoard.Boom.find
+        for _i:= DrawBoard.X.locate - DrawBoard.Boom.find to DrawBoard.X.locate + DrawBoard.Boom.find
         do begin
-            for DrawBoard_j:= DrawBoard.Y.locate - DrawBoard.Boom.find to DrawBoard.Y.locate + DrawBoard.Boom.find
+            for _j:= DrawBoard.Y.locate - DrawBoard.Boom.find to DrawBoard.Y.locate + DrawBoard.Boom.find
             do begin                
                 if 
-                    (DrawBoard.Board[DrawBoard_i, DrawBoard_j].show = 1)
+                    (DrawBoard.Board[_i, _j].show = 1)
                     and
-                    (DrawBoard_j > 1)
+                    (_j > 1)
                     and
-                    (DrawBoard_i >= 1)
+                    (_i >= 1)
                 then begin
-                    gotoXY(DrawBoard_i, DrawBoard_j);
+                    gotoXY(_i, _j);
                     textcolor(blue);
                     if 
-                        (DrawBoard.Board[DrawBoard_i, DrawBoard_j].Val <> 'X')
-                    then CharPrint(DrawBoard.Board[DrawBoard_i, DrawBoard_j].Val)
+                        (DrawBoard.Board[_i, _j].Val <> 'X')
+                    then CharPrint(DrawBoard.Board[_i, _j].Val)
                     else 
                     if 
-                        (DrawBoard.board[DrawBoard_i, DrawBoard_j].show = 1)
+                        (DrawBoard.board[_i, _j].show = 1)
                         and 
-                        (DrawBoard.board[DrawBoard_i, DrawBoard_j].Val = 'X')
+                        (DrawBoard.board[_i, _j].Val = 'X')
                     then inc(DrawBoard.Boom.found);
                 end;
-                DrawBoard.Board[DrawBoard_i, DrawBoard_j].show:= 2;
+                DrawBoard.Board[_i, _j].show:= 2;
             end;
         end;
         gotoXY(1, DrawBoard.Y.max + 5);
         
-        TVWriteln('Đã thấy ' + IntToStr(DrawBoard.Boom.found) + '/' + IntToStr(DrawBoard.Boom.Number) + '');
+        TVWriteln('Đã thấy ' + IntToStr(DrawBoard.Boom.found) + '/' + IntToStr(DrawBoard.Boom.Number) + '', white, black);
         if 
             (DrawBoard.Boom.found = DrawBoard.Boom.Number)
         then DrawBoard:= MessageToQuit('thắng', DrawBoard);
     end;
-procedure resetFootprint(resetFootprint_X, resetFootprint_Y: integer; 
-                         resetFootprint_ProV: ProV
-                        );
+
+    procedure resetFootprint(resetFootprint_X, resetFootprint_Y: integer; 
+                             resetFootprint_ProV: ProV
+                            );
     begin
         gotoXY(resetFootprint_X, resetFootprint_Y);
         if 
@@ -187,9 +202,10 @@ procedure resetFootprint(resetFootprint_X, resetFootprint_Y: integer;
             CharPrint(resetFootprint_ProV.console.char);
         end;
     end;
-procedure make_Footprint(make_Footprint_X, make_Footprint_Y: integer;
-                         make_Footprint_ProV: ProV
-                        );
+
+    procedure make_Footprint(make_Footprint_X, make_Footprint_Y: integer;
+                             make_Footprint_ProV: ProV
+                            );
     begin
         gotoXY(make_Footprint_X, make_Footprint_Y);
         textcolor(red);
@@ -200,10 +216,11 @@ procedure make_Footprint(make_Footprint_X, make_Footprint_Y: integer;
         then CharPrint(make_Footprint_ProV.board[make_Footprint_X, make_Footprint_Y].Val)
         else CharPrint(make_Footprint_ProV.console.char);        
     end;
-procedure Footprint(Footprint_X, Footprint_Y,
-                    XOrY, Footprint_Val0, Footprint_Val1: integer; 
-                    Footprint_ProV: ProV
-                   );
+
+    procedure Footprint(Footprint_X, Footprint_Y,
+                        XOrY, Footprint_Val0, Footprint_Val1: integer; 
+                        Footprint_ProV: ProV
+                       );
     begin
         case XOrY of 
             0: begin
@@ -228,11 +245,12 @@ procedure Footprint(Footprint_X, Footprint_Y,
             end;
         end;
     end;
-function processWayGo(Location_input, IncOrDec, XOrY,
-                      processWayGo_X, processWayGo_Y, 
-                      processWayGo_min, processWayGo_max:integer;
-                      processWayGo_ProV: ProV
-                     ): integer;    
+
+    function processWayGo(Location_input, IncOrDec, XOrY,
+                          processWayGo_X, processWayGo_Y, 
+                          processWayGo_min, processWayGo_max:integer;
+                          processWayGo_ProV: ProV
+                         ): integer;    
     begin
         processWayGo:= Location_input;
         case IncOrDec of
@@ -261,7 +279,8 @@ function processWayGo(Location_input, IncOrDec, XOrY,
             else exit;
         end;
     end;
-function changeFontSize(FontSize_ProV: ProV): ProV;
+
+    function changeFontSize(FontSize_ProV: ProV): ProV;
     var 
         FontSize_key: char;
     begin
@@ -270,14 +289,14 @@ function changeFontSize(FontSize_ProV: ProV): ProV;
         CWindowsGenerator(25, 6, FontSize_ProV);
         clrscr;
         gotoXY     (1, 2);
-        TVWriteln  ('');            
-        TVWriteln  ('[T], [G]: tăng hoặc giảm');
-        TVWriteln  ('[H]: qua trang tiếp theo');
-        TVWriteln  ('[ENTER]: xác nhận');
-        TVWrite    ('[Q]: thoát menu');
+        TVWriteln  ('', white, black);            
+        TVWriteln  ('[T], [G]: tăng hoặc giảm', white, black);
+        TVWriteln  ('[H]: qua trang tiếp theo', white, black);
+        TVWriteln  ('[ENTER]: xác nhận', white, black);
+        TVWrite    ('[Q]: thoát menu', white, black);
         repeat
             gotoXY(1, 1);
-            TVWrite    ('FontSize hiện tại: ');clreol;
+            TVWrite    ('FontSize hiện tại: ', white, black);clreol;
             textcolor  (red);
             StringPrint(IntToStr(changeFontSize.console.FontSize));
             FontSize_key:= readkey;
@@ -290,10 +309,11 @@ function changeFontSize(FontSize_ProV: ProV): ProV;
                     exit;
                 end;
             end;
-            changeFontSize.console.FontSize:= Set_console_fontsize(changeFontSize.console.FontSize);
+            SetConFont(changeFontSize.console.FontSize);
         until (FontSize_key = #13);
     end;
-function changeChar(char_ProV: ProV): ProV;
+
+    function changeChar(char_ProV: ProV): ProV;
     var 
         char_key, Char_CurrentChar: char;
     begin
@@ -303,14 +323,14 @@ function changeChar(char_ProV: ProV): ProV;
         clrscr;
         repeat
             gotoXY     (1, 1);            
-            TVWrite    ('Char hiện tại: ');
+            TVWrite    ('Char hiện tại: ', white, black);
             textcolor  (red);
             StringPrint(Char_CurrentChar);
-            TVWriteln  ('');            
-            TVWriteln  ('[Bất kì]: thay đổi char');
-            TVWriteln  ('[H]: qua trang tiếp theo');
-            TVWriteln  ('[ENTER]: xác nhận');
-            TVWrite    ('[Q]: thoát menu');
+            TVWriteln  ('', white, black);            
+            TVWriteln  ('[Bất kì]: thay đổi char', white, black);
+            TVWriteln  ('[H]: qua trang tiếp theo', white, black);
+            TVWriteln  ('[ENTER]: xác nhận', white, black);
+            TVWrite    ('[Q]: thoát menu', white, black);
             gotoXY(1, 20);
             char_key:= readkey;
             case char_key of 
@@ -325,19 +345,22 @@ function changeChar(char_ProV: ProV): ProV;
         until (char_key = #13);
         changeChar.console.char := Char_CurrentChar;
     end;
-function Menu(Menu_ProV: ProV): ProV;
+
+    function Menu(Menu_ProV: ProV): ProV;
     begin
         menu:= Menu_ProV;
         Menu:= changeFontSize(Menu_ProV);
     end;
-procedure CWindowsGenerator(CWindowsGenerator_X, CWindowsGenerator_Y: integer;
-                            CWindowsGenerator_ProV: ProV
-                           );
+
+    procedure CWindowsGenerator(CWindowsGenerator_X, CWindowsGenerator_Y: integer;
+                                CWindowsGenerator_ProV: ProV
+                               );
     begin
         WindowsGenerator(CWindowsGenerator_X, CWindowsGenerator_Y);
-        Set_console_fontsize(CWindowsGenerator_ProV.console.FontSize);
+        SetConFont(CWindowsGenerator_ProV.console.FontSize);
     end;
-function GetXorY(GetXorY_input: string): integer;
+
+    function GetXorY(GetXorY_input: string): integer;
     var 
         GetXorY_string: string;
     begin
@@ -348,11 +371,11 @@ function GetXorY(GetXorY_input: string): integer;
             (GetXorY > C_max)
         do begin
             clrscr;
-            gotoXY(1, 2);            
-            TVWrite  ('[R]: ngẫu nhiên');
-            gotoXY(1, 1);
-            TVWrite  ('Nhập số ' + GetXorY_input + ': ');clreol;
             cursoron();
+            gotoXY(1, 2);            
+            TVWrite  ('[R]: ngẫu nhiên', white, black);
+            gotoXY(1, 1);
+            TVWrite  ('Nhập số ' + GetXorY_input + ': ', white, black);clreol;
             readln(GetXorY_string);
             if (GetXorY_string = IntToStr(sohoa(GetXorY_string)))
             then begin
@@ -369,17 +392,18 @@ function GetXorY(GetXorY_input: string): integer;
             cursoroff();
         end;
     end;
-function MessageToQuit(MessageToQuit_input: string;
-                       MessageToQuit_ProV: ProV
-                      ): ProV;
+
+    function MessageToQuit(MessageToQuit_input: string;
+                           MessageToQuit_ProV: ProV
+                          ): ProV;
     const
         MessageToQuit_delay = 50;
     var 
-        MessageToQuit_i   : integer;
+        {MessageToQuit_i   : integer;}
         MessageToQuit_key : char;
     begin        
         MessageToQuit:= MessageToQuit_ProV;
-        if MessageToQuit_input = 'thắng'
+        {if MessageToQuit_input = 'thắng'
         then begin
             for MessageToQuit_i:= 1 to 25
             do begin
@@ -388,15 +412,15 @@ function MessageToQuit(MessageToQuit_input: string;
                 color(black, white);
                 delay(MessageToQuit_delay);
             end;
-        end;        
-        color  (white, black);
+        end;     
+        color  (white, black);}
         clrscr;
         FinalBoard(MessageToQuit_ProV);
         gotoXY(1, MessageToQuit_ProV.Y.max + 3);
-        TVWriteln('Bạn đã ' + MessageToQuit_input);
+        TVWriteln('Bạn đã ' + MessageToQuit_input, white, randomN);
         delay  (3000);
-        TVWriteln('[R] Chơi Lại');
-        TVWrite  ('[Q] Thoát');
+        TVWriteln('[R] Chơi Lại', white, black);
+        TVWrite  ('[Q] Thoát', white, black);
         repeat
             MessageToQuit_key:= readkey;
             if 

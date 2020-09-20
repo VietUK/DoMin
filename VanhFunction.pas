@@ -8,29 +8,47 @@ uses dos, sysutils, windows, classes;
 var 
     WindMin: Word  = $0;  
     WindMax: Word  = $184f;
-Function WinMinX: Byte;
-Function WinMaxX: Byte;
+{$i VanhConst.inc}
+Function WinMinX                                         : Byte;
+Function WinMaxX                                         : Byte;
 function checkNumberInput(checkNumberInput_input: string): boolean;
-function SoHoa(input_SoHoa: string): integer;
-function Set_console_fontsize(Fontsize: smallint {short}): integer;
-function CharInc(CharInc_input: char):char;
-function ReadKey: Char;
-function ScreenCursor: tcoord;
-function ConsoleSize: tcoord;
-function SadEmoji: string;
+function SoHoa           (input_SoHoa: string)           : integer;
+function CharInc         (CharInc_input: char)           : char;
+function ReadKey                                         : Char;
+function ScreenCursorPascal                              : tcoord;
+function ScreenCursorSystem                              : tcoord;
+function ConsoleSize                                     : tcoord;
+function SadEmoji                                        : string;
+function TextProperties  (color, background: byte)       : byte;
+function VanhRandom      (inp: byte)                     : byte;
 
 implementation
-    type
-        CONSOLE_FONT_INFOEX = record
-            cbSize      : ULONG;
-            nFont       : DWORD;
-            dwFontSizeX : SHORT;
-            dwFontSizeY : SHORT;
-            FontFamily  : UINT;
-            FontWeight  : UINT; 
-            FaceName    : array [0..LF_FACESIZE-1] of WCHAR;
-        end;
 
+    function VanhRandom(inp: byte): byte;
+    var
+        VanhRandom_out: byte;
+    begin
+        VanhRandom_out:= VVanhRandom;
+        inc(VanhRandom_out);
+        if VanhRandom_out >= inp 
+        then 
+         begin
+            VanhRandom:= 1;
+            VVanhRandom:= 1;
+         end
+        else
+         begin 
+            VanhRandom:= VanhRandom_out;
+            VVanhRandom:= VanhRandom_out;
+         end;
+    end;
+
+    function TextProperties(color, background: byte): byte;
+    begin
+        TextProperties:=(Color and $8f) or (TextProperties and $70);
+        TextProperties:=((background shl 4) and ($f0 and not Blink)) or (TextProperties and ($0f OR Blink) );
+    end;
+    
     function ConsoleSize: tcoord;
     var
         ConsoleInfo : TConsoleScreenBufferInfo;
@@ -44,7 +62,7 @@ implementation
         ConsoleSize.Y := ConsoleInfo.dwMaximumWindowSize.Y;
     end;
 
-    function ScreenCursor: tcoord;
+    function ScreenCursorSystem: tcoord;
     var
         ConsoleInfo : TConsoleScreenBufferInfo;
     begin
@@ -53,39 +71,22 @@ implementation
             GetStdHandle(STD_OUTPUT_HANDLE), 
             ConsoleInfo
         );
-        ScreenCursor.X := ConsoleInfo.dwCursorPosition.X;
-        ScreenCursor.Y := ConsoleInfo.dwCursorPosition.Y;
+        ScreenCursorSystem.X := ConsoleInfo.dwCursorPosition.X;
+        ScreenCursorSystem.Y := ConsoleInfo.dwCursorPosition.Y;
     end;
 
-    function SetCurrentConsoleFontEx(hConsoleOutput: HANDLE; bMaximumWindow: BOOL; var CONSOLE_FONT_INFOEX): BOOL;
-    stdcall; external 'kernel32.dll' name 'SetCurrentConsoleFontEx';
- 
-    {***************************************************}
-
-    function Set_console_fontsize(Fontsize: smallint {short}): integer; 
-    const 
-        Codepage: int64 = 65001; 
+    function ScreenCursorPascal: tcoord;
     var
-        New_CONSOLE_FONT_INFOEX : CONSOLE_FONT_INFOEX;
-        Rslt: boolean; 
+        ConsoleInfo : TConsoleScreenBufferInfo;
     begin
-        SetConsoleOutputCP(Codepage);
-        {SetTextCodepage(Output, Codepage);}
-        FillChar(New_CONSOLE_FONT_INFOEX, SizeOf(CONSOLE_FONT_INFOEX), 0);
- 
-        with New_CONSOLE_FONT_INFOEX do
-        begin
-            cbSize := SizeOf(CONSOLE_FONT_INFOEX);
-            nFont:= 0; 
-            dwFontSizeX:= 0; {Values 0..100 don't seem to have any effect}
-            dwFontSizeY:= Fontsize;
-            FontFamily := FF_DONTCARE;  
-            FaceName := 'Consolas';            
-            FontWeight:= 400 
-        end;
-        Rslt:= SetCurrentConsoleFontEx(StdOutputHandle,false,New_CONSOLE_FONT_INFOEX);
-        Set_console_fontsize:= Fontsize;
-    end;
+        FillChar(ConsoleInfo, SizeOf(ConsoleInfo), 0);
+        GetConsoleScreenBufferInfo(
+            GetStdHandle(STD_OUTPUT_HANDLE), 
+            ConsoleInfo
+        );
+        ScreenCursorPascal.X := ConsoleInfo.dwCursorPosition.X + 1;
+        ScreenCursorPascal.Y := ConsoleInfo.dwCursorPosition.Y + 1;
+    end; 
 
     function SoHoa(input_SoHoa: string): integer;
     begin
@@ -134,6 +135,8 @@ implementation
         SadEmoji_arr[1]:= ':(';
         SadEmoji_arr[2]:= '';
         SadEmoji_arr[3]:= '';
-        SadEmoji:= SadEmoji_arr[2];
+        SadEmoji:= SadEmoji_arr[1];
     end;
+Initialization
+    VVanhRandom:= 1;
 end.

@@ -11,33 +11,8 @@ uses
     keyboard;
 var  
     DoMinVar : ProV;
-    _i, _i1, _j, _j1    : T_integer;
-    _key                : char;
-procedure
-    resetVal();
-    begin
-        programTitle('DoMin_V0_9');
-        SetMultiByteConversionCodePage(CP_UTF8);
-        SetMultiByteRTLFileSystemCodePage(CP_UTF8);
-        SetConsoleOutputCP(CP_UTF8);
-        DoMinVar.X.max               := 1;
-        DoMinVar.Y.max               := 1;
-        DoMinVar.Boom.find           := 1;
-        DoMinVar.Boom.Difficult.Level:= 1;
-        DoMinVar.Boom.Number         := 0;
-        DoMinVar.Boom.found          := 0;
-        DoMinVar.console.FontSize    := TextNormal;
-        DoMinVar.console.char        := char(254);
-        for _i:= C_maxAm to C_max
-        do begin
-            for _j:= C_maxAm to C_max
-            do begin
-                DoMinVar.Board[_i, _j].Val:= '0';
-                DoMinVar.Board[_i, _j].show := 0;
-            end;
-        end;
-        DoMinVar.Stop:= 0;
-    end;
+    _i1, _j1 : integer;
+    _key     : char;
 procedure
     play();
     begin
@@ -52,8 +27,7 @@ procedure
             end;
         end;
         repeat
-            DoMinVar.console.FontSize:= 
-                Set_console_fontsize(DoMinVar.console.FontSize);
+            SetConFont(DoMinVar.console.FontSize);
             gotoXY(DoMinVar.X.locate, DoMinVar.Y.locate);
             make_Footprint(
                 DoMinVar.X.locate, 
@@ -234,58 +208,46 @@ procedure
         for _i:= 1 to DoMinVar.Boom.Number
         do begin
             repeat
-                DoMinVar.SetBoom.X:= 
-                    random(DoMinVar.X.max) + 1;
-                DoMinVar.SetBoom.Y:= 
-                    random(DoMinVar.Y.max) + 2;
+                DoMinVar.SetBoom.X:= random(DoMinVar.X.max) + 1;
+                DoMinVar.SetBoom.Y:= random(DoMinVar.Y.max) + 2;
             until 
-             DoMinVar.Board[
-                DoMinVar.SetBoom.X, 
-                DoMinVar.SetBoom.Y
-             ].Val <> 'X';
-            DoMinVar.Board[
-                DoMinVar.SetBoom.X, 
-                DoMinVar.SetBoom.Y
-            ].Val:= 'X';
-            for _i1:= 
-             DoMinVar.SetBoom.X - 1 
-             to 
-             DoMinVar.SetBoom.X + 1
+             DoMinVar.Board[DoMinVar.SetBoom.X, DoMinVar.SetBoom.Y].Val <> 'X';
+             DoMinVar.Board[DoMinVar.SetBoom.X, DoMinVar.SetBoom.Y].Val:= 'X';
+            for _i1:= DoMinVar.SetBoom.X - 1 
+                      to 
+                      DoMinVar.SetBoom.X + 1
             do begin
-                for _j1:= 
-                 DoMinVar.SetBoom.Y - 1 
-                 to 
-                 DoMinVar.SetBoom.Y + 1
+                for _j1:= DoMinVar.SetBoom.Y - 1 
+                          to 
+                          DoMinVar.SetBoom.Y + 1
                 do begin
                     if 
                         (DoMinVar.Board[_i1, _j1].Val <> 'X')
                         and
                         ((_i <> _i1) or (_j <> _j1))
                     then begin
-                        DoMinVar.Board[_i1, _j1].Val
-                            := CharInc(DoMinVar.Board[_i1,_j1].Val);
+                        DoMinVar.Board[_i1, _j1].Val:= CharInc(DoMinVar.Board[_i1,_j1].Val);
                     end;
                 end;
             end;
         end;
-        DoMinVar.console.FontSize:= Set_console_fontsize(TextNormal);
-        play();
+        SetConFont(TextNormal);
     end;
 procedure
     GetInput();
     begin
-        DoMinVar.console.FontSize:= Set_console_fontsize(TextLarge);
+        SetConFont(TextLarge);
         WindowsGenerator(18, 2);
         DoMinVar.Y.max:= GetXorY('hàng');
         DoMinVar.X.max:= GetXorY('cột');
-        WindowsGenerator(18, 5);
+        WindowsGenerator(16, 5);
         clrscr;
         repeat
-            TVWriteln('Chọn độ khó:');
-            TVWriteln('[1]: Dễ');
-            TVWriteln('[2]: Trung bình');
-            TVWriteln('[3]: Khó');
-            TVWrite  ('[4]: GOD!!!!!!!!');
+            TVWriteln('Chọn độ khó:    ', black  , white);
+            TVWriteln('[1]: Dễ         ', green  , black);
+            TVWriteln('[2]: Trung bình ', yellow , black);
+            TVWriteln('[3]: Khó        ', red    , black);
+            TVWrite  ('[4]: GOD!!!!!!!!', black  , red);
             _key:= readkey;
             case _key of    
                 '1': begin 
@@ -314,14 +276,15 @@ procedure
             (DoMinVar.Boom.Difficult.Level = 4)
             or
             (DoMinVar.Boom.Difficult.Level = 5);
-        MainProcess();
     end;
 BEGIN
-    DoMinVar.console.FontSize:= Set_console_fontsize(TextNormal);
+    SetConFont(TextNormal);
     randomize;
     cursoroff;
     repeat
-        resetVal();
+        DoMinVar:= resetVal();
         GetInput();
+        MainProcess();
+        play();
     until DoMinVar.Stop = 1;
 END.

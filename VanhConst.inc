@@ -21,13 +21,18 @@ Const
 
 { Add-in for blinking }
     Blink         = 128;
+    randomN       = 16;
 var 
-    TextAttr: Byte = $07; 
+    TextAttr   : Byte = $07; 
+    VVanhRandom: Byte = 0;
+    write_num  : DWord;
+    _i, _j       : integer;
+    CursorInfo: TConsoleCursorInfo;
     
     { FPC Specific for large screen support }
-    WindMinX : DWord;
-    WindMaxX : DWord;
-    WindMinY : DWord;
-    WindMaxY : DWord;
+    WindMinX   : DWord;
+    WindMaxX   : DWord;
+    WindMinY   : DWord;
+    WindMaxY   : DWord;
 type 
     tcrtcoord = 1..255;

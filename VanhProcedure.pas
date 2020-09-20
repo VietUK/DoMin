@@ -12,35 +12,74 @@ var
 {$i VanhConst.inc}
 {$DEFINE FPC_CRT_CTRLC_TREATED_AS_KEY}
 
-Procedure TextColor(Color: Byte);
-Procedure TextBackground(Color: Byte);
+Procedure TextColor       (Color: Byte);
+Procedure TextBackground  (Color: Byte);
 procedure WindowsGenerator(WindowsGenerator_X, WindowsGenerator_Y: integer);
-procedure dpmi_dosmemfillword(seg,ofs : word;count : longint;w : word);
-procedure seg_fillword(seg : word;ofs : longint;count : longint;w : word);
 procedure clrscr;
-Procedure GotoXY(GotoXY_X, GotoXY_Y: tcrtcoord);
+Procedure GotoXY          (GotoXY_X, GotoXY_Y: tcrtcoord);
 Procedure ClrEol;
-procedure color(textcolor_input, backgroundcolor_input: Byte);
+procedure ConsoleColor    (textcolor_inp, backgroundcolor_inp: Byte);
 procedure cursoron;
 procedure cursoroff;
 procedure cursorbig;
-procedure Delay(MS: Word);
-procedure programTitle(programTitle_input: pchar);
+procedure Delay           (MS: Word);
+procedure programTitle    (programTitle_inp: pchar);
 procedure installSRC;
-procedure TVWrite(TVWrite_input: string);
-procedure TVWriteln(TVWriteln_input: string);
-procedure CharPrint(CharPrint_inp: Char);
-procedure removeline(y : DWord);
-procedure StringPrint(StringPrint_inp: string);
+procedure TVWrite         (TVWrite_inp: string; color, background: Byte);
+procedure TVWriteln       (TVWriteln_inp: string; color, background: Byte);
+procedure CharPrint       (CharPrint_inp: Char);
+procedure removeline      (y : DWord);
+procedure StringPrint     (StringPrint_inp: string);
+procedure NormVideo;
+procedure LowVideo;
+procedure HighVideo;
+Procedure SetConFont      (Fontsize: smallint {short}); 
 const 
-    dosmemfillword : procedure(seg,ofs : word;count : longint;w : word)=@dpmi_dosmemfillword;
     TextLarge      = 30;
     TextNormal     = 20;
 implementation
+    type
+        CONSOLE_FONT_INFOEX = record
+            cbSize      : ULONG;
+            nFont       : DWORD;
+            dwFontSizeX : SHORT;
+            dwFontSizeY : SHORT;
+            FontFamily  : UINT;
+            FontWeight  : UINT; 
+            FaceName    : array [0..LF_FACESIZE-1] of WCHAR;
+        end;
+
     var
-        VidSeg    : word;
-        CursorInfo: TConsoleCursorInfo;
         ConsoleInfo : TConsoleScreenBufferinfo;
+
+    function SetCurrentConsoleFontEx(hConsoleOutput: HANDLE; bMaximumWindow: BOOL; var CONSOLE_FONT_INFOEX): BOOL;
+    stdcall; external 'kernel32.dll' name 'SetCurrentConsoleFontEx';
+ 
+    {***************************************************}
+
+    Procedure SetConFont(Fontsize: smallint {short}); 
+    const 
+        Codepage: int64 = 65001; 
+    var
+        New_CONSOLE_FONT_INFOEX : CONSOLE_FONT_INFOEX;
+        Rslt: boolean; 
+    begin
+        SetConsoleOutputCP(Codepage);
+        {SetTextCodepage(Output, Codepage);}
+        FillChar(New_CONSOLE_FONT_INFOEX, SizeOf(CONSOLE_FONT_INFOEX), 0);
+ 
+        with New_CONSOLE_FONT_INFOEX do
+        begin
+            cbSize := SizeOf(CONSOLE_FONT_INFOEX);
+            nFont:= 0; 
+            dwFontSizeX:= 0; {Values 0..100 don't seem to have any effect}
+            dwFontSizeY:= Fontsize;
+            FontFamily := FF_DONTCARE;  
+            FaceName := 'Consolas';            
+            FontWeight:= 400 
+        end;
+        Rslt:= SetCurrentConsoleFontEx(StdOutputHandle,false,New_CONSOLE_FONT_INFOEX);
+    end;
 
     procedure removeline(y : DWord);
     var
@@ -73,23 +112,76 @@ implementation
             CharInfo
         );
     end;
-    
-    procedure TVWrite(TVWrite_input: string);
+
+    procedure colorFiller(X, Y, writebyte: Byte);
     begin
+        GotoXY(X, Y);
+        WriteConsoleOutputAttribute(
+            GetStdHandle(STD_OUTPUT_HANDLE),
+            @writebyte,
+            1,
+            ScreenCursorSystem,
+            write_num
+        );
+    end;
+    
+    procedure VanhWrite(VanhWrite_inp: string; color, background: Byte);
+    type
+        tcursor = record
+            first: TCoord;
+            final: TCoord;
+        end;
+    var
+         VanhWrite_cursor
+        : tcursor;
+         VanhWrite_i     
+        : integer;
+         color2,
+         background2
+        : Byte;
+    begin
+        VanhWrite_cursor.first:= ScreenCursorPascal;
         SetMultiByteConversionCodePage(CP_UTF8);
         SetMultiByteRTLFileSystemCodePage(CP_UTF8);
         SetConsoleOutputCP(CP_UTF8);
-        Write(TVWrite_input);
+        Write(VanhWrite_inp);
+        VanhWrite_cursor.final:= ScreenCursorPascal;
+        if CursorInfo.bVisible = false then inc(VanhWrite_cursor.final.X);
+        
+        for VanhWrite_i:= VanhWrite_cursor.first.X 
+                          to 
+                           VanhWrite_cursor.final.X - 1
+        do begin
+            if color = randomN then 
+             begin
+                color2:= vanhrandom(16);
+                While (color2 = 8) or (color2 = 7) or (color2 = background2) do color2:= vanhrandom(16);
+             end
+            else 
+                color2:= color;
+            if background = randomN then 
+             begin
+                background2:= vanhrandom(15);
+                While (background2 = 8) or (background2 = 7) or (background2 = color2) do background2:= vanhrandom(15);
+             end
+            else 
+                background2:= background;
+            colorFiller(VanhWrite_i, VanhWrite_cursor.first.Y, TextProperties(color2, background2));
+        end;
+
+        if CursorInfo.bVisible = true then GotoXY(VanhWrite_cursor.final.X, VanhWrite_cursor.final.Y);
     end;
 
-    procedure TVWriteln(TVWriteln_input: string);
+    procedure TVWriteln(TVWriteln_inp: string; color, background: Byte);
     begin
-        SetMultiByteConversionCodePage(CP_UTF8);
-        SetMultiByteRTLFileSystemCodePage(CP_UTF8);
-        SetConsoleOutputCP(CP_UTF8);
-        if TVWriteln_input = ''
-        then writeln
-        else writeln(TVWriteln_input);
+        if TVWriteln_inp <> '' 
+        then VanhWrite(TVWriteln_inp, color, background);
+        GotoXY(WindMinX, ScreenCursorPascal.Y + 1);
+    end;
+
+    procedure TVWrite(TVWrite_inp: string; color, background: Byte);
+    begin
+        VanhWrite(TVWrite_inp, color, background);
     end;
 
     procedure WindowsGenerator(WindowsGenerator_X, WindowsGenerator_Y:integer);
@@ -106,46 +198,12 @@ implementation
         exec('cmd', '/c mklink "C:\Vanh_Src" "'+ FilePath +'Vanh_Src" /J')
     end;
 
-    procedure programTitle(programTitle_input: pchar);
+    procedure programTitle(programTitle_inp: pchar);
     begin
         SetMultiByteConversionCodePage(CP_UTF8);
         SetMultiByteRTLFileSystemCodePage(CP_UTF8);
         SetConsoleOutputCP(CP_UTF8);
-        SetConsoleTitle(programTitle_input);
-    end;
-
-    procedure seg_fillword(seg : word;ofs : longint;count : longint;w : word);
-    begin
-        asm
-            pushl %edi
-            movl ofs,%edi
-            movl count,%ecx
-            movw w,%dx
-            { load segment }
-            pushw %es
-            movw seg,%ax
-            movw %ax,%es
-            { fill eax }
-            movw %dx,%ax
-            shll $16,%eax
-            movw %dx,%ax
-            movl %ecx,%edx
-            shrl $1,%ecx
-            cld
-            rep
-            stosl
-            movl %edx,%ecx
-            andl $1,%ecx
-            rep
-            stosw
-            popw %es
-            popl %edi
-        end;
-    end;
-
-    procedure dpmi_dosmemfillword(seg,ofs : word;count : longint;w : word);
-    begin
-        seg_fillword(dosmemselector,seg*16+ofs,count,w);
+        SetConsoleTitle(programTitle_inp);
     end;
 
     Procedure TextColor(Color: Byte);
@@ -162,8 +220,22 @@ implementation
     var 
         Coord: TCoord;
     begin
-        Coord.X:= GotoXY_x - 1;
-        Coord.Y:= GotoXY_y - 1;
+        if GotoXY_X > ConsoleSize.X 
+        then 
+         begin
+            Coord.X:= WindMinX - 1;
+            inc(GotoXY_Y);
+         end
+        else Coord.X:= GotoXY_x - 1;
+
+        if GotoXY_Y > ConsoleSize.Y
+        then 
+         begin
+            Coord.Y:= WindMaxY - 1;
+            RemoveLine(1);
+         end
+        else Coord.Y:= GotoXY_y - 1;
+
         SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), Coord);
     end;
 
@@ -174,7 +246,7 @@ implementation
         Coord: TCoord;
     begin
         CharInfo := #32;
-        Coord:= ScreenCursor;
+        Coord:= ScreenCursorSystem;
         FillConsoleOutputCharacter(GetStdHandle(STD_OUTPUT_HANDLE), CharInfo, ConsoleSize.X - Coord.X, Coord, @Temp);
         FillConsoleOutputAttribute(GetStdHandle(STD_OUTPUT_HANDLE), TextAttr, ConsoleSize.X - Coord.X, Coord, @Temp);
     end;
@@ -191,14 +263,12 @@ implementation
         Sleep(ms);
     end;
 
-    procedure color(textcolor_input, backgroundcolor_input: Byte);
+    procedure ConsoleColor(textcolor_inp, backgroundcolor_inp: Byte);
     begin
-        TextColor(textcolor_input);TextBackground(backgroundcolor_input);
+        exec('cmd', '/c color '+ IntToStr(textcolor_inp) + IntToStr(backgroundcolor_inp))
     end;
 
     procedure cursoron;
-    var 
-        CursorInfo: TConsoleCursorInfo;
     begin
         GetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), CursorInfo);
         CursorInfo.dwSize := SaveCursorSize;
@@ -208,8 +278,6 @@ implementation
 
 
     procedure cursoroff;
-    var 
-        CursorInfo: TConsoleCursorInfo;
     begin
         GetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), CursorInfo);
         CursorInfo.bVisible := false;
@@ -228,21 +296,19 @@ implementation
     end;
 
     procedure CharPrint(CharPrint_inp: Char);
-    var 
-        write_num: DWord;
     begin
         WriteConsoleOutputCharacter(
             GetStdhandle(STD_OUTPUT_HANDLE), 
             @CharPrint_inp, 
             1, 
-            ScreenCursor, 
+            ScreenCursorSystem, 
             write_num
         );
         WriteConsoleOutputAttribute(
             GetStdHandle(STD_OUTPUT_HANDLE),
             @TextAttr,
             1,
-            ScreenCursor,
+            ScreenCursorSystem,
             write_num
         );        
     end;
@@ -254,18 +320,36 @@ implementation
         for StringPrint_i:= 1 to length(StringPrint_inp)
         do begin
             CharPrint(StringPrint_inp[StringPrint_i]);
-            GotoXY(ScreenCursor.X + 2 , ScreenCursor.Y + 1);
-            if ScreenCursor.x + 1 >= ConsoleSize.X then
+            GotoXY(ScreenCursorSystem.X + 2 , ScreenCursorSystem.Y + 1);
+            if ScreenCursorSystem.x > ConsoleSize.X - 1 then
              begin
-                GotoXY(WindMinX, ScreenCursor.Y + 2);
-                While ScreenCursor.Y > ConsoleSize.Y do
+                GotoXY(WindMinX, ScreenCursorSystem.Y + 2);
+                While ScreenCursorSystem.Y > ConsoleSize.Y do
                  begin
                     RemoveLine(1);
-                    GotoXY(ScreenCursor.X, ScreenCursor.Y - 1)
+                    GotoXY(ScreenCursorSystem.X, ScreenCursorSystem.Y - 1)
                  end;
              end;
         end;
     end;
+
+    procedure NormVideo;
+    begin
+        TextAttr := $7;
+    end;
+
+
+    procedure LowVideo;
+    begin
+        TextAttr := TextAttr and $F7;
+    end;
+
+
+    procedure HighVideo;
+    begin
+        TextAttr := TextAttr or $8;
+    end;
+
 Initialization
     FillChar(CursorInfo, SizeOf(CursorInfo), 00);
     GetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), CursorInfo);
@@ -280,4 +364,6 @@ Initialization
     SetMultiByteRTLFileSystemCodePage(CP_UTF8);
     SetConsoleOutputCP(CP_UTF8);
     clrscr;
+    HighVideo;
+    SetConFont(14);
 end.
